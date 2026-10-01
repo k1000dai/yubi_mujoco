@@ -1,0 +1,10 @@
+{
+  "motor_scale": 1.0,
+  "motor_offset": 0.0,
+  "joint_max": 0.94,
+  "object_mass": 0.05,
+  "friction": 1.2,
+  "gripper_torque": 1.0,
+  "gripper_kp": 4.0,
+  "camera_fovy": 90.0
+}

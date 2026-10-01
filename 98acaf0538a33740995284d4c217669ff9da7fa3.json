@@ -1,0 +1,14 @@
+{
+  "scheme": "Official robot-gripper assembly cover, black/red build",
+  "reference": "https://github.com/Toyota/yubi-hw/blob/dd8bd13d2fd8e5003057243576f88be333d95fc5/docs/AssemblyInstruction/YUBI%20Gripper_DYNAMIXEL_AssemblyGuide.pdf",
+  "reference_page": 1,
+  "note": "Visual RGB approximations from the official rendered assembly and photographed black/red YUBI build, not measured spectral material calibration.",
+  "palm_structure": [0.16, 0.17, 0.18, 1.0],
+  "palm_servo": [0.065, 0.07, 0.085, 1.0],
+  "palm_camera": [0.055, 0.06, 0.075, 1.0],
+  "jaw_attachment": [0.20, 0.21, 0.22, 1.0],
+  "jaw_pad": [0.72, 0.025, 0.035, 1.0],
+  "jaw_flap": [0.15, 0.16, 0.17, 1.0],
+  "jaw_hardware": [0.50, 0.52, 0.55, 1.0],
+  "jaw_rubber": [0.045, 0.05, 0.055, 1.0]
+}

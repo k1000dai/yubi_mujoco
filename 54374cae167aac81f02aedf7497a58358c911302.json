@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "source_step": "cad/source/YUBI Gripper Assy_Dynamixel_ver2.STEP",
+  "cad_unit": "millimeter",
+  "mesh_unit": "meter",
+  "cad_origin_mm": [
+    854.070661629179,
+    856.5046236934521,
+    1286.5734593075358
+  ],
+  "cad_to_canonical_rotation": [
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      0
+    ]
+  ],
+  "cad_to_canonical_scale": 0.001,
+  "formula": "canonical_m = 0.001 * rotation @ (cad_mm - cad_origin_mm)",
+  "canonical_axes": {
+    "x": "+CAD Z, along parallel fingers",
+    "y": "+CAD X, toward source left jaw",
+    "z": "+CAD Y, hinge axis / camera side"
+  },
+  "bodies": {
+    "palm": {
+      "origin_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "left_jaw": {
+      "origin_m": [
+        -0.015999999999828787,
+        0.014999999999733518,
+        0.0
+      ],
+      "joint_axis": [
+        0,
+        0,
+        1
+      ],
+      "opening_angle_sign": 1,
+      "cad_neutral_joint_angle_rad": 0.0
+    },
+    "right_jaw": {
+      "origin_m": [
+        -0.01600000000017144,
+        -0.014999999999733518,
+        0.0
+      ],
+      "joint_axis": [
+        0,
+        0,
+        1
+      ],
+      "opening_angle_sign": -1,
+      "cad_neutral_joint_angle_rad": 0.0
+    }
+  },
+  "cad_neutral": "Parallel attachments point +canonical X; proven by paired flap mounting holes. This is a geometric reference, not a measured motor encoder zero.",
+  "calibration": {
+    "motor_zero_verified": false,
+    "robot_joint_limits_verified": false,
+    "nominal_glove_opening_range_rad": [
+      0.0,
+      0.94
+    ],
+    "nominal_range_warning": "Glove URDF range, not measured robot travel. CAD neutral already has a nonzero pad gap. Do not call q=0 fully closed."
+  },
+  "geometric_evidence": {
+    "right_jaw": {
+      "shaft_bore_radius_mm": 4.0,
+      "shaft_bore_center_mm": [
+        839.0706616294455,
+        862.5046236934472,
+        1270.5734593073644
+      ],
+      "shaft_axis_cad": [
+        0,
+        1,
+        0
+      ],
+      "flap_screw_centers_mm": [
+        [
+          834.0706616294581,
+          866.5046236934472,
+          1301.5734593073664
+        ],
+        [
+          834.0706616294653,
+          866.5046236934472,
+          1319.5734593073664
+        ]
+      ],
+      "flap_screw_spacing_mm": 18.0,
+      "finger_direction_cad": [
+        4.0421986745463475e-13,
+        0.0,
+        1.0
+      ]
+    },
+    "left_jaw": {
+      "shaft_bore_radius_mm": 4.0,
+      "shaft_bore_center_mm": [
+        869.0706616289125,
+        862.504623693457,
+        1270.573459307707
+      ],
+      "shaft_axis_cad": [
+        0,
+        1,
+        0
+      ],
+      "flap_screw_centers_mm": [
+        [
+          874.0706616289125,
+          866.504623693457,
+          1301.573459307707
+        ],
+        [
+          874.0706616289125,
+          866.504623693457,
+          1319.573459307707
+        ]
+      ],
+      "flap_screw_spacing_mm": 18.0,
+      "finger_direction_cad": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  },
+  "optional_material_meshes": {
+    "palm": [
+      "cad_palm_camera.stl",
+      "cad_palm_servo.stl",
+      "cad_palm_structure.stl"
+    ],
+    "left_jaw": [
+      "cad_left_jaw_attachment.stl",
+      "cad_left_jaw_flap.stl",
+      "cad_left_jaw_hardware.stl",
+      "cad_left_jaw_pad.stl",
+      "cad_left_jaw_rubber.stl"
+    ],
+    "right_jaw": [
+      "cad_right_jaw_attachment.stl",
+      "cad_right_jaw_flap.stl",
+      "cad_right_jaw_hardware.stl",
+      "cad_right_jaw_pad.stl",
+      "cad_right_jaw_rubber.stl"
+    ]
+  }
+}

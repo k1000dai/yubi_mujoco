@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yubi_mujoco"
+version = "0.1.0"
+description = "CAD-based, arm-free YUBI gripper simulation for MuJoCo"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT AND CERN-OHL-W-2.0 AND Apache-2.0"
+license-files = ["LICENSE", "src/yubi_mujoco/assets/licenses/*.txt", "src/yubi_mujoco/assets/NOTICE.md"]
+authors = [{name = "YUBI MuJoCo contributors"}]
+keywords = ["mujoco", "robotics", "gripper", "yubi", "simulation", "mjcf"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = ["mujoco>=3.2,<4", "numpy>=1.26", "scipy>=1.12"]
+
+[project.optional-dependencies]
+video = ["imageio>=2.34", "imageio-ffmpeg>=0.5"]
+dev = ["pytest>=8", "ruff>=0.12", "build>=1.2", "twine>=6"]
+
+[project.urls]
+Repository = "https://github.com/k1000dai/yubi_mujoco"
+Issues = "https://github.com/k1000dai/yubi_mujoco/issues"
+Changelog = "https://github.com/k1000dai/yubi_mujoco/blob/main/CHANGELOG.md"
+
+[project.scripts]
+yubi-mujoco = "yubi_mujoco.cli:main"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["yubi_mujoco*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+yubi_mujoco = ["assets/*.json", "assets/*.md", "assets/meshes/*.stl", "assets/licenses/*.txt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["rendering: needs an OpenGL/EGL/OSMesa rendering backend"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

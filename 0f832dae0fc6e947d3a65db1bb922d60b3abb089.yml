@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'release' }}
+
+jobs:
+  lint:
+    name: Lint and format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install "ruff>=0.12"
+      - run: python -m ruff check .
+      - run: python -m ruff format --check .
+
+  test:
+    name: Test ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.10"
+          - os: ubuntu-latest
+            python: "3.12"
+          - os: ubuntu-latest
+            python: "3.13"
+          - os: windows-latest
+            python: "3.12"
+          - os: macos-latest
+            python: "3.12"
+    env:
+      MUJOCO_GL: ${{ matrix.os == 'ubuntu-latest' && 'egl' || 'glfw' }}
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      PYTHONUTF8: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install software EGL on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y libegl1 libgl1 libgl1-mesa-dri libglfw3
+      - name: Install package normally, not editable
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[dev,video]"
+          python -m pip check
+      - name: Test installed package outside the checkout
+        run: |
+          mkdir -p "$RUNNER_TEMP/yubi-tests"
+          cd "$RUNNER_TEMP/yubi-tests"
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            python -m pytest "$GITHUB_WORKSPACE/tests" --import-mode=importlib -ra
+          else
+            python -m pytest "$GITHUB_WORKSPACE/tests" --import-mode=importlib -m "not rendering" -ra
+          fi
+
+  distributions:
+    name: Build and verify distributions
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MUJOCO_GL: egl
+      LIBGL_ALWAYS_SOFTWARE: "1"
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install build tools and software EGL
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y libegl1 libgl1 libgl1-mesa-dri libglfw3
+          python -m pip install --upgrade pip
+          python -m pip install "build>=1.2" "twine>=6"
+      - name: Build sdist, then wheel from sdist
+        run: python -m build
+      - name: Validate metadata and packaged assets
+        run: |
+          python -m twine check --strict dist/*
+          python scripts/check_dist.py dist
+      - name: Require release tag to match both distributions
+        if: github.event_name == 'release'
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: python scripts/check_dist.py dist --release-tag "$RELEASE_TAG"
+      - name: Smoke-test wheel and sdist in separate clean environments
+        run: python scripts/check_dist.py dist --smoke --render --video
+      - name: Save exactly the verified release files
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: python-distributions
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 14

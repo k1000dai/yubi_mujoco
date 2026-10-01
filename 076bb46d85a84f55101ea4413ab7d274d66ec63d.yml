@@ -1,0 +1,49 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pypi-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    name: Test and build the release
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    name: Publish verified wheel and sdist
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # No checkout, package installation, or untrusted project code runs in this job.
+    # Add PYPI_API_TOKEN as a repository Actions secret before publishing a release.
+    steps:
+      - name: Require the repository PyPI token
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          if [ -z "$PYPI_API_TOKEN" ]; then
+            echo "::error::Set the PYPI_API_TOKEN repository Actions secret before publishing a release."
+            exit 1
+          fi
+      - name: Download the verified distributions from this run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: python-distributions
+          path: dist
+          digest-mismatch: error
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: dist
+          attestations: false
+          skip-existing: false
+

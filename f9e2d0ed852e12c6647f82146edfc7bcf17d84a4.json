@@ -1,0 +1,801 @@
+{
+  "schema_version": 1,
+  "copyright": "Copyright 2026 Toyota Motor Corporation",
+  "license": "CERN-OHL-W-2.0",
+  "license_file": "cad/source/LICENSE",
+  "source_location": "https://github.com/Toyota/yubi-hw",
+  "source_commit": "dd8bd13d2fd8e5003057243576f88be333d95fc5",
+  "source_step": "cad/source/YUBI Gripper Assy_Dynamixel_ver2.STEP",
+  "source_sha256": "0e60bf62de970e5fae5e7cff104f547a954ef8d5d7b9dde9835b381b95f4fcc8",
+  "modification_date": "2026-10-01",
+  "modification_notice": "Tessellated, grouped by rigid body, converted mm to m, and re-expressed in a canonical frame and pivot-local jaw frames; no intentional solid-geometry design changes.",
+  "exporter": "cad/export.py",
+  "assembly_config": "src/yubi_mujoco/assets/cad_assembly.json",
+  "freecad_version": [
+    "1",
+    "0",
+    "0",
+    "",
+    "https://code.launchpad.net/~vcs-imports/freecad/trunk",
+    "2026/08/25 11:49:11"
+  ],
+  "tessellation": {
+    "linear_deflection_mm": 0.12,
+    "angular_deflection_rad": 0.35
+  },
+  "solid_leaf_count": 97,
+  "aggregate_solid_count": {
+    "right_jaw": 20,
+    "left_jaw": 15,
+    "palm": 62
+  },
+  "no_duplicate_compounds": true,
+  "cad_volume_mm3": 217449.4353463515,
+  "bounds_canonical_m": [
+    [
+      -0.060999972979410816,
+      -0.04599998291824147,
+      -0.05649998502157712
+    ],
+    [
+      0.0891390651065267,
+      0.04600001708175853,
+      0.06086824007607913
+    ]
+  ],
+  "distribution_note": "Only 13 disjoint material-level meshes are distributed; aggregate meshes omitted to avoid duplicated geometry.",
+  "meshes": {
+    "left_jaw_attachment": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_left_jaw_attachment.stl",
+      "body": "left_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.015999999999828787,
+        0.014999999999733518,
+        0.0
+      ],
+      "triangles": 1772,
+      "bytes": 88684,
+      "sha256": "f5e866eb76c825da590efde4a0dfd07f60ab715c08d9ff4a484d96e98026afe4",
+      "bounds_local_m": [
+        [
+          -0.012999972979582029,
+          -0.01299998291797499,
+          -0.009999985021577118
+        ],
+        [
+          0.06400002702041797,
+          0.013000017082025011,
+          0.010000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature018",
+          "label": "FINGER ATTACHMENT_L"
+        }
+      ],
+      "aggregate": false
+    },
+    "left_jaw_flap": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_left_jaw_flap.stl",
+      "body": "left_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.015999999999828787,
+        0.014999999999733518,
+        0.0
+      ],
+      "triangles": 700,
+      "bytes": 35084,
+      "sha256": "fa36d85721036dd63b143492a5e4fcc8b7107cfdb0922a7abe02d4475d05ada4",
+      "bounds_local_m": [
+        [
+          0.020000027020417973,
+          0.0010000170820250107,
+          -0.008999985021577117
+        ],
+        [
+          0.07000002702041798,
+          0.03100001708202501,
+          0.012000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature034",
+          "label": "FLAP_L"
+        }
+      ],
+      "aggregate": false
+    },
+    "left_jaw_hardware": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_left_jaw_hardware.stl",
+      "body": "left_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.015999999999828787,
+        0.014999999999733518,
+        0.0
+      ],
+      "triangles": 16646,
+      "bytes": 832384,
+      "sha256": "d2a4f6ec5cc114ab96dd43e085412394e14563775be888d4e4ee3e850c831190",
+      "bounds_local_m": [
+        [
+          -0.01593991438583203,
+          -0.01599973877734999,
+          -0.015999985021577116
+        ],
+        [
+          0.06125002702041797,
+          0.01599971190624376,
+          0.016000014978422884
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature012",
+          "label": "SSFRHQ8-20-F6-P5-T6-Q5-KC8-A12"
+        },
+        {
+          "name": "Part__Feature015",
+          "label": "GEAKB1.0-30-6-B-8N-QFC17-M3-LL003"
+        },
+        {
+          "name": "Part__Feature016",
+          "label": "GEAKB1.0-30-6-B-8N-QFC17-M3-LL004"
+        },
+        {
+          "name": "Part__Feature025",
+          "label": "WSSAB10-5-002"
+        },
+        {
+          "name": "Part__Feature051",
+          "label": "CB2.5-10"
+        },
+        {
+          "name": "Part__Feature052",
+          "label": "CB2.5-018"
+        },
+        {
+          "name": "Part__Feature059",
+          "label": "CB2-008"
+        },
+        {
+          "name": "Part__Feature060",
+          "label": "CB2-009"
+        },
+        {
+          "name": "Part__Feature075",
+          "label": "KEG3-009"
+        },
+        {
+          "name": "Part__Feature078",
+          "label": "CBSTNR3-010"
+        },
+        {
+          "name": "Part__Feature079",
+          "label": "CBSTNR3-011"
+        }
+      ],
+      "aggregate": false
+    },
+    "left_jaw_pad": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_left_jaw_pad.stl",
+      "body": "left_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.015999999999828787,
+        0.014999999999733518,
+        0.0
+      ],
+      "triangles": 2196,
+      "bytes": 109884,
+      "sha256": "a52de595759b43ba21507e39fb9b87998bbc4a6b7b16cc1772e95b0d4c337b4d",
+      "bounds_local_m": [
+        [
+          0.021500027020417974,
+          -0.0049999829179749895,
+          -0.009999985021577118
+        ],
+        [
+          0.10499367936416798,
+          0.00900001708202501,
+          0.010000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature020",
+          "label": "PAD_t20"
+        }
+      ],
+      "aggregate": false
+    },
+    "left_jaw_rubber": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_left_jaw_rubber.stl",
+      "body": "left_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.015999999999828787,
+        0.014999999999733518,
+        0.0
+      ],
+      "triangles": 256,
+      "bytes": 12884,
+      "sha256": "1d91d2b147a29da1936297c91cf22d23d29e4b93803f703224cc150c5e8065d2",
+      "bounds_local_m": [
+        [
+          0.022022732098542972,
+          -0.006499982917974989,
+          -0.009999985021577118
+        ],
+        [
+          0.10513906510635548,
+          0.0004986743085875107,
+          0.010000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature022",
+          "label": "RUBBER SHEET_t20"
+        }
+      ],
+      "aggregate": false
+    },
+    "palm_camera": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_palm_camera.stl",
+      "body": "palm",
+      "coordinate_frame": "canonical_root",
+      "body_origin_canonical_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 1404,
+      "bytes": 70284,
+      "sha256": "0681bc8bf5b77140ab510f9babebb61dfe0edfbcc33ff40d80ca26e1e8fe643d",
+      "bounds_local_m": [
+        [
+          -0.029639255205973315,
+          -0.015999982918241472,
+          0.027223525720610382
+        ],
+        [
+          -0.0024391819637858136,
+          0.01600001708175853,
+          0.05901521273232913
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature028",
+          "label": "USB CAMERA_ELP-USBFHD01M-L180"
+        },
+        {
+          "name": "Part__Feature029",
+          "label": "USB CAMERA_ELP-USBFHD01M-L181"
+        },
+        {
+          "name": "Part__Feature030",
+          "label": "USB CAMERA_ELP-USBFHD01M-L182"
+        },
+        {
+          "name": "Part__Feature031",
+          "label": "USB CAMERA_ELP-USBFHD01M-L183"
+        },
+        {
+          "name": "Part__Feature032",
+          "label": "USB CAMERA_ELP-USBFHD01M-L184"
+        }
+      ],
+      "aggregate": false
+    },
+    "palm_servo": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_palm_servo.stl",
+      "body": "palm",
+      "coordinate_frame": "canonical_root",
+      "body_origin_canonical_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 14752,
+      "bytes": 737684,
+      "sha256": "12911383e3d858e208469934af68af47f54b8c5f330edb8e48476e0c87286248",
+      "bounds_local_m": [
+        [
+          -0.030249972979410813,
+          -0.02624998291824147,
+          -0.05199998502157712
+        ],
+        [
+          -0.0017499729794108135,
+          0.02025001708175853,
+          -0.014100021642670869
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature001",
+          "label": "DYNAMIXEL XM430-W350-R"
+        },
+        {
+          "name": "Part__Feature002",
+          "label": "DYNAMIXEL XM430-W350-R001"
+        },
+        {
+          "name": "Part__Feature003",
+          "label": "DYNAMIXEL XM430-W350-R002"
+        },
+        {
+          "name": "Part__Feature004",
+          "label": "DYNAMIXEL XM430-W350-R003"
+        },
+        {
+          "name": "Part__Feature005",
+          "label": "DYNAMIXEL XM430-W350-R004"
+        },
+        {
+          "name": "Part__Feature006",
+          "label": "DYNAMIXEL XM430-W350-R005"
+        },
+        {
+          "name": "Part__Feature007",
+          "label": "DYNAMIXEL XM430-W350-R006"
+        }
+      ],
+      "aggregate": false
+    },
+    "palm_structure": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_palm_structure.stl",
+      "body": "palm",
+      "coordinate_frame": "canonical_root",
+      "body_origin_canonical_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 51042,
+      "bytes": 2552184,
+      "sha256": "a56612e6669e21978bd957fbf462f0fba8b01aa6b286a4c4e94587b96f892f0a",
+      "bounds_local_m": [
+        [
+          -0.060999972979410816,
+          -0.041999982918241474,
+          -0.05649998502157712
+        ],
+        [
+          2.7020589186577127e-08,
+          0.04200001708175853,
+          0.06086824007607913
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature",
+          "label": "BRACKET_DYNAMIXEL"
+        },
+        {
+          "name": "Part__Feature009",
+          "label": "CASE"
+        },
+        {
+          "name": "Part__Feature010",
+          "label": "MTA05-13ZZ DBS"
+        },
+        {
+          "name": "Part__Feature011",
+          "label": "WSSAB10-5-1"
+        },
+        {
+          "name": "Part__Feature023",
+          "label": "MTA05-13ZZ DBS001"
+        },
+        {
+          "name": "Part__Feature024",
+          "label": "MTA05-13ZZ DBS002"
+        },
+        {
+          "name": "Part__Feature027",
+          "label": "UPPER PLATE_CAMERA BKT"
+        },
+        {
+          "name": "Part__Feature035",
+          "label": "SB-304550"
+        },
+        {
+          "name": "Part__Feature036",
+          "label": "SB-304551"
+        },
+        {
+          "name": "Part__Feature037",
+          "label": "SB-304552"
+        },
+        {
+          "name": "Part__Feature038",
+          "label": "SB-304553"
+        },
+        {
+          "name": "Part__Feature039",
+          "label": "SB-264040"
+        },
+        {
+          "name": "Part__Feature040",
+          "label": "SB-304554"
+        },
+        {
+          "name": "Part__Feature041",
+          "label": "SB-304555"
+        },
+        {
+          "name": "Part__Feature042",
+          "label": "SB-203030"
+        },
+        {
+          "name": "Part__Feature043",
+          "label": "SB-304556"
+        },
+        {
+          "name": "Part__Feature044",
+          "label": "SB-304557"
+        },
+        {
+          "name": "Part__Feature045",
+          "label": "SB-304558"
+        },
+        {
+          "name": "Part__Feature046",
+          "label": "JPBPB2-3"
+        },
+        {
+          "name": "Part__Feature047",
+          "label": "JPDPB2-3"
+        },
+        {
+          "name": "Part__Feature048",
+          "label": "CB2.5-15"
+        },
+        {
+          "name": "Part__Feature049",
+          "label": "CB2.5-016"
+        },
+        {
+          "name": "Part__Feature050",
+          "label": "CB2.5-017"
+        },
+        {
+          "name": "Part__Feature055",
+          "label": "CB2.5-6"
+        },
+        {
+          "name": "Part__Feature056",
+          "label": "CB2.5-021"
+        },
+        {
+          "name": "Part__Feature061",
+          "label": "CB2.5-022"
+        },
+        {
+          "name": "Part__Feature062",
+          "label": "CB2.5-023"
+        },
+        {
+          "name": "Part__Feature063",
+          "label": "CB2.5-024"
+        },
+        {
+          "name": "Part__Feature064",
+          "label": "CB2.5-025"
+        },
+        {
+          "name": "Part__Feature065",
+          "label": "CBSTNR2-5"
+        },
+        {
+          "name": "Part__Feature066",
+          "label": "CBSTNR2-006"
+        },
+        {
+          "name": "Part__Feature067",
+          "label": "CBSTNR2-007"
+        },
+        {
+          "name": "Part__Feature068",
+          "label": "CBSTNR2-008"
+        },
+        {
+          "name": "Part__Feature080",
+          "label": "CBE3-8"
+        },
+        {
+          "name": "Part__Feature081",
+          "label": "CBE3-009"
+        },
+        {
+          "name": "Part__Feature082",
+          "label": "CBE3-010"
+        },
+        {
+          "name": "Part__Feature083",
+          "label": "CBE3-011"
+        },
+        {
+          "name": "Part__Feature084",
+          "label": "BRACKET_GRIPPER"
+        },
+        {
+          "name": "Part__Feature085",
+          "label": "UR5e_FLANGE"
+        },
+        {
+          "name": "Part__Feature086",
+          "label": "CBE3-012"
+        },
+        {
+          "name": "Part__Feature087",
+          "label": "CBE3-013"
+        },
+        {
+          "name": "Part__Feature088",
+          "label": "CBE3-014"
+        },
+        {
+          "name": "Part__Feature089",
+          "label": "CBE3-015"
+        },
+        {
+          "name": "Part__Feature090",
+          "label": "XDSHC6-P4-L6-B5"
+        },
+        {
+          "name": "Part__Feature091",
+          "label": "CBE6-10"
+        },
+        {
+          "name": "Part__Feature092",
+          "label": "CBE6-011"
+        },
+        {
+          "name": "Part__Feature093",
+          "label": "CBE6-012"
+        },
+        {
+          "name": "Part__Feature094",
+          "label": "CBE6-013"
+        },
+        {
+          "name": "Part__Feature095",
+          "label": "JPBPB2-004"
+        },
+        {
+          "name": "Part__Feature096",
+          "label": "JPDPB2-004"
+        }
+      ],
+      "aggregate": false
+    },
+    "right_jaw_attachment": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_right_jaw_attachment.stl",
+      "body": "right_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.01600000000017144,
+        -0.014999999999733518,
+        0.0
+      ],
+      "triangles": 1496,
+      "bytes": 74884,
+      "sha256": "471b507000cf4a15f21720a433dc09987ae4c115bce06e4a7d7c38195a8efc4c",
+      "bounds_local_m": [
+        [
+          -0.012999972979239376,
+          -0.012999982918507954,
+          -0.009999985021577118
+        ],
+        [
+          0.06400002702076063,
+          0.013000017081492047,
+          0.010000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature017",
+          "label": "FINGER ATTACHMENT_R"
+        }
+      ],
+      "aggregate": false
+    },
+    "right_jaw_flap": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_right_jaw_flap.stl",
+      "body": "right_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.01600000000017144,
+        -0.014999999999733518,
+        0.0
+      ],
+      "triangles": 700,
+      "bytes": 35084,
+      "sha256": "8b6ca75f88541c7481b5258e4b67dc15e45d7e668f296be3b67f46429e791098",
+      "bounds_local_m": [
+        [
+          0.020000027020760626,
+          -0.030999982918507953,
+          -0.008999985021577117
+        ],
+        [
+          0.07000002702076064,
+          -0.0009999829185079537,
+          0.012000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature033",
+          "label": "FLAP_R"
+        }
+      ],
+      "aggregate": false
+    },
+    "right_jaw_hardware": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_right_jaw_hardware.stl",
+      "body": "right_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.01600000000017144,
+        -0.014999999999733518,
+        0.0
+      ],
+      "triangles": 25700,
+      "bytes": 1285084,
+      "sha256": "cbf709befbbe55ae5ecee84539e8a650d4ca08a5ca4c91bbecc1b56547af4510",
+      "bounds_local_m": [
+        [
+          -0.01599997297923937,
+          -0.015939924324757954,
+          -0.020100021642670867
+        ],
+        [
+          0.061245998700448126,
+          0.015939897452585797,
+          0.016000014978422884
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature008",
+          "label": "GEAR SHAFT"
+        },
+        {
+          "name": "Part__Feature013",
+          "label": "GEAKB1.0-30-6-B-8N-QFC17-M3-LL"
+        },
+        {
+          "name": "Part__Feature014",
+          "label": "GEAKB1.0-30-6-B-8N-QFC17-M3-LL001"
+        },
+        {
+          "name": "Part__Feature026",
+          "label": "WSSAB10-5-003"
+        },
+        {
+          "name": "Part__Feature053",
+          "label": "CB2.5-019"
+        },
+        {
+          "name": "Part__Feature054",
+          "label": "CB2.5-020"
+        },
+        {
+          "name": "Part__Feature057",
+          "label": "CB2-6"
+        },
+        {
+          "name": "Part__Feature058",
+          "label": "CB2-007"
+        },
+        {
+          "name": "Part__Feature069",
+          "label": "CBSTNR2.5-6"
+        },
+        {
+          "name": "Part__Feature070",
+          "label": "CBSTNR2-009"
+        },
+        {
+          "name": "Part__Feature071",
+          "label": "CBSTNR2-010"
+        },
+        {
+          "name": "Part__Feature072",
+          "label": "CBSTNR2-011"
+        },
+        {
+          "name": "Part__Feature073",
+          "label": "CBSTNR2-012"
+        },
+        {
+          "name": "Part__Feature074",
+          "label": "KEG3-8"
+        },
+        {
+          "name": "Part__Feature076",
+          "label": "CBSTNR3-8"
+        },
+        {
+          "name": "Part__Feature077",
+          "label": "CBSTNR3-009"
+        }
+      ],
+      "aggregate": false
+    },
+    "right_jaw_pad": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_right_jaw_pad.stl",
+      "body": "right_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.01600000000017144,
+        -0.014999999999733518,
+        0.0
+      ],
+      "triangles": 2270,
+      "bytes": 113584,
+      "sha256": "021b1585ac1ec7f56f68bff98bbf7bcbcc80c6ac4dde9a8a6ba188f60dfbb2cc",
+      "bounds_local_m": [
+        [
+          0.021500027020760627,
+          -0.008999982918507954,
+          -0.019999985021577116
+        ],
+        [
+          0.10499367936451062,
+          0.0050000170814920464,
+          0.010000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature019",
+          "label": "PAD_t30_R"
+        }
+      ],
+      "aggregate": false
+    },
+    "right_jaw_rubber": {
+      "file": "src/yubi_mujoco/assets/meshes/cad_right_jaw_rubber.stl",
+      "body": "right_jaw",
+      "coordinate_frame": "joint_local",
+      "body_origin_canonical_m": [
+        -0.01600000000017144,
+        -0.014999999999733518,
+        0.0
+      ],
+      "triangles": 258,
+      "bytes": 12984,
+      "sha256": "a17b233a41f6dccce7c0d9f09c624e7069e7617de6bf3407e6ed962a5ac21a5d",
+      "bounds_local_m": [
+        [
+          0.022022732098885625,
+          -0.0004994336021017041,
+          -0.019999985021577116
+        ],
+        [
+          0.10513906510669813,
+          0.006500017081492046,
+          0.010000014978422882
+        ]
+      ],
+      "leaf_features": [
+        {
+          "name": "Part__Feature021",
+          "label": "RUBBER SHEET_t30_R"
+        }
+      ],
+      "aggregate": false
+    }
+  }
+}
