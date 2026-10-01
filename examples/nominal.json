@@ -4,7 +4,8 @@
   "joint_max": 0.94,
   "object_mass": 0.05,
   "friction": 1.2,
-  "gripper_torque": 1.0,
-  "gripper_kp": 4.0,
+  "gripper_torque": 4.1,
+  "gripper_speed": 4.8,
+  "gripper_kp": 20.0,
   "camera_fovy": 90.0
 }

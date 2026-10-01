@@ -1,4 +1,4 @@
-"""Runnable demos, batch evaluation, portable MJCF and interactive pose teleop."""
+"""Runnable demos, batch evaluation, portable MJCF and scene rendering."""
 
 import argparse
 from contextlib import contextmanager
@@ -10,7 +10,6 @@ import shutil
 import sysconfig
 import time
 import sys
-import numpy as np
 
 
 def _config(args):
@@ -200,66 +199,6 @@ def _render(args):
     return 0
 
 
-def _teleop(args):
-    from .env import YubiEnv
-    from scipy.spatial.transform import Rotation
-    import mujoco.viewer
-    import threading
-
-    lock = threading.Lock()
-    pending = []
-
-    def key_callback(key):
-        with lock:
-            pending.append(key)
-
-    print(
-        "1/2 select hand; W/S ±X, A/D ±Y, R/F ±Z; I/K pitch, J/L yaw, U/M roll; O/C open/close; Space reset; Esc quit"
-    )
-    with YubiEnv(_config(args)) as env:
-        env.reset(seed=args.seed)
-        targets, jaw = env.targets.copy(), np.full(2, min(0.55, 0.9 * env.config.joint_max))
-        active = 0
-        with mujoco.viewer.launch_passive(env.model, env.data, key_callback=key_callback) as viewer:
-            while viewer.is_running():
-                start = time.perf_counter()
-                with lock:
-                    keys, pending[:] = pending.copy(), []
-                for key in keys:
-                    k = chr(key).upper() if 0 <= key < 256 else ""
-                    if k in "12" and k:
-                        active = int(k) - 1
-                    if k == " ":
-                        env.reset(seed=args.seed)
-                        targets, jaw = (
-                            env.targets.copy(),
-                            np.full(2, min(0.55, 0.9 * env.config.joint_max)),
-                        )
-                    for plus, minus, axis in (("W", "S", 0), ("A", "D", 1), ("R", "F", 2)):
-                        if k in (plus, minus):
-                            targets[active, axis] += 0.01 if k == plus else -0.01
-                    for plus, minus, axis in (("U", "M", 0), ("I", "K", 1), ("J", "L", 2)):
-                        if k in (plus, minus):
-                            rv = np.zeros(3)
-                            rv[axis] = 0.05 if k == plus else -0.05
-                            targets[active, 3:] = (
-                                Rotation.from_quat(targets[active, 3:]) * Rotation.from_rotvec(rv)
-                            ).as_quat()
-                    if k in ("O", "C"):
-                        jaw[active] = np.clip(
-                            jaw[active] + (0.04 if k == "O" else -0.04), 0, env.config.joint_max
-                        )
-                if not env._done:
-                    try:
-                        env.step_absolute(targets, env.motor_for_jaw(jaw))
-                    except ValueError as exc:
-                        print(exc)
-                        targets = env.targets.copy()
-                viewer.sync()
-                time.sleep(max(0, 1 / env.config.control_hz - (time.perf_counter() - start)))
-    return 0
-
-
 def main(argv=None):
     from . import __version__
 
@@ -268,7 +207,7 @@ def main(argv=None):
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
-    for cmd in ("demo", "evaluate", "export-mjcf", "render", "teleop"):
+    for cmd in ("demo", "evaluate", "export-mjcf", "render"):
         p = sub.add_parser(cmd)
         p.add_argument(
             "--task", choices=("pick_place", "push", "lift", "dual_pick_place"), default=None
@@ -311,12 +250,11 @@ def main(argv=None):
         parser.error("episodes must be positive")
     if args.command == "render" and not (0 < args.width <= 1280 and 0 < args.height <= 960):
         parser.error("render width must be 1..1280 and height 1..960")
-    if args.command == "teleop" or getattr(args, "viewer", False):
+    if getattr(args, "viewer", False):
         _relaunch_under_mjpython(argv)
     handlers = {
         "export-mjcf": _export,
         "render": _render,
-        "teleop": _teleop,
         "demo": _run,
         "evaluate": _run,
     }

@@ -88,8 +88,8 @@ window stops the run; completed episodes stay in `report.json`, which records
 written as in a headless run, but `wall_seconds` includes the real-time pacing.
 
 The viewer needs a desktop OpenGL window, not a headless backend. On macOS,
-MuJoCo's passive viewer must run under `mjpython`; `--viewer` and `teleop`
-relaunch the CLI under the environment's `mjpython` automatically. This also
+MuJoCo's passive viewer must run under `mjpython`; `--viewer`
+relaunches the CLI under the environment's `mjpython` automatically. This also
 works for uv-managed Pythons, whose shared library plain `uv run mjpython`
 cannot locate.
 
@@ -124,17 +124,6 @@ model = mujoco.MjModel.from_xml_path("yubi-output/mjcf/scene.xml")
 The Python `env.save_mjcf(path)` convenience method writes XML referencing the
 installed package's absolute asset paths. Use the export command when you need
 a self-contained scene.
-
-### Keyboard teleoperation
-
-```bash
-uv run yubi-mujoco teleop --task pick_place
-```
-
-Teleoperation uses the same viewer as `--viewer` (see above). Select a hand with `1`/`2`.
-`W`/`S`, `A`/`D`, and `R`/`F` move it along world ±X, ±Y, and ±Z. `I`/`K`
-change pitch, `J`/`L` yaw, and `U`/`M` roll. `O`/`C` open/close the gripper.
-Press Space to reset, including after an episode finishes, and Escape to exit.
 
 ## Python environment
 
@@ -171,8 +160,10 @@ terminal flag. This is a Gym-like interface without a Gym dependency or registry
 - Grippers have shape `(2,)` and contain absolute motor coordinates in radians.
   `jaw_rad = motor_scale * motor_rad + motor_offset`; the defaults 1 and 0 are
   uncalibrated. `motor_for_jaw()` applies the inverse mapping.
-- The nominal jaw command interval is `0..0.94` rad. Zero is the CAD parallel-jaw
-  reference, not fully closed or a measured hardware encoder zero.
+- The jaw command interval is `0..0.94` rad, the yubi-sw glove range. Zero is
+  the glove's calibrated closed pose, 7.5° closed from the CAD parallel jaws.
+  The simulated jaws stop at 0.03 rad (pads touch) and 0.80 rad (CAD opening
+  stop); see [articulation](model.md#coordinates-and-articulation).
 - Requested positions outside X ±0.6 m, Y ±0.4 m, or Z 0.01–0.7 m are rejected.
   These are simulator bounds, not a real arm's reachable workspace.
 - Targets are rate-limited to 0.6 m/s and 3 rad/s by default. The two flags in
@@ -299,6 +290,6 @@ macOS. For viewer guidance, consult the
 
 A failed GL initialization does not establish that physics or policy loading is
 broken. First try `yubi-mujoco demo` without video; then test `render` to isolate
-the graphics path. GUI teleoperation, headless images, and policy inference are
+the graphics path. The live viewer, headless images, and policy inference are
 separate checks. Do not infer macOS/Windows or driver compatibility from Linux
 headless results. See [validation scope](validation.md).

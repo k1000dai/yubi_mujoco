@@ -24,6 +24,7 @@ ASSET_FILES = {
     "cad_assembly.json",
     "cad_manifest.json",
     "colors.json",
+    "mass_properties.json",
     "SOURCE.md",
     "NOTICE.md",
     "licenses/Apache-2.0.txt",

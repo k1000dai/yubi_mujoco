@@ -23,7 +23,7 @@ def oracle_rollout(env, *, on_step=None):
                 on_step(env, info)
 
     poses = env.targets.copy()
-    opening = min(0.55, 0.9 * env.config.joint_max)
+    opening = env.open_jaw
     jaw = np.array([opening, opening])
     if env.config.task == "push":
         # Turn the fingers upward and push with the palm contact proxy.

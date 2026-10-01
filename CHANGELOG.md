@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Jaw angle zero is now the closed pose of yubi-sw's `yubi_hand.urdf.xacro`
+  (7.5° closed from the CAD parallel jaws), so recorded glove `joint_states`
+  map 1:1 onto jaw angles; the default open command is 0.68 rad
+- Jaw hinges stop at 0.03 rad (pads touch) and 0.80 rad (CAD opening
+  interference); commands up to the 0.94 rad glove range are still accepted
+- Body masses and full inertias come from the pinned STEP via the new
+  `cad/mass_properties.py` and `mass_properties.json` asset
+- Gripper defaults follow the DYNAMIXEL XM430-W350: 4.1 N m stall torque and a
+  4.8 rad/s no-load torque-speed line (`gripper_speed`); gain raised to 20
+- Wrist camera moved to the CAD lens center with its 10° downward pitch
+- Palm collision box extended to the servo bracket's underside
+
+### Removed
+
+- Keyboard `teleop` command; teleoperation belongs in a separate repository
+
 ## 0.1.0 — initial release candidate
 
 This version is prepared for an initial release. Availability on PyPI depends
@@ -17,10 +37,9 @@ on a successful publication; this entry alone does not indicate it is published.
 - Absolute hand-root pose/motor API and delta-pose policy adapter
 - Local `Policy(checkpoint_dir).infer(obs)` evaluation with wrist images,
   configurable chunk adoption, explicit timing, and JSON diagnostics
-- PNG scene rendering, optional MP4 recording, portable MJCF export, and
-  keyboard teleoperation
+- PNG scene rendering, optional MP4 recording, portable MJCF export
 - Real-time MuJoCo viewer for `demo` and `evaluate` (`--viewer`), with automatic
-  `mjpython` relaunch on macOS for the viewer and teleoperation
+  `mjpython` relaunch on macOS for the viewer
 - Minimal base dependencies: MuJoCo, NumPy, and SciPy; video dependencies in
   the optional `video` extra
 - English usage, model-limit, validation, contributor, and release documentation

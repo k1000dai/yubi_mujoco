@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "source_commit": "dd8bd13d2fd8e5003057243576f88be333d95fc5",
+  "source_step": "cad/source/YUBI Gripper Assy_Dynamixel_ver2.STEP",
+  "source_sha256": "0e60bf62de970e5fae5e7cff104f547a954ef8d5d7b9dde9835b381b95f4fcc8",
+  "generator": "cad/mass_properties.py",
+  "method": "Exact OpenCascade solid volume, centroid and inertia per STEP leaf; BOM material densities; catalog masses for the servo and camera.",
+  "assumptions": {
+    "pla_density_g_cm3": 1.24,
+    "print_fill_dense": 0.75,
+    "print_fill_default": 0.6,
+    "servo_mass_g": 82.0,
+    "camera_mass_g": 30.0,
+    "finger_attachment": "A2024; printed PLA attachments lower each jaw by about 17 g",
+    "palm_includes_ur5e_mount": true
+  },
+  "bodies": {
+    "left_jaw": {
+      "frame": "joint_local_cad_neutral",
+      "mass_kg": 0.116063,
+      "com_m": [
+        0.0155819,
+        0.001976,
+        0.0001348
+      ],
+      "fullinertia_kg_m2": [
+        9.894614e-06,
+        8.3109e-05,
+        8.493509e-05,
+        -6.050756e-06,
+        -1.261836e-06,
+        -4.055355e-07
+      ],
+      "fullinertia_order": "xx yy zz xy xz yz, about the center of mass",
+      "mass_breakdown_kg": {
+        "A2017 washer": 0.00016,
+        "A2024 (machined option)": 0.02331,
+        "HyperV rubber sheet (assumed density)": 0.00287,
+        "PLA, 3 walls >=50% infill": 0.0114,
+        "PLA, default print settings": 0.00285,
+        "S45C key": 0.00054,
+        "S45C spur gear": 0.06265,
+        "SCM435 screw": 0.003,
+        "SUS304 shaft": 0.00929
+      }
+    },
+    "palm": {
+      "frame": "canonical_root",
+      "mass_kg": 0.306431,
+      "com_m": [
+        -0.0303599,
+        -0.0007618,
+        -0.0116356
+      ],
+      "fullinertia_kg_m2": [
+        0.0003168079,
+        0.0003013891,
+        0.000191512,
+        3.388339e-06,
+        -9.621742e-06,
+        -7.24263e-06
+      ],
+      "fullinertia_order": "xx yy zz xy xz yz, about the center of mass",
+      "mass_breakdown_kg": {
+        "A2017 washer": 0.00016,
+        "A2024": 0.09719,
+        "PLA, 3 walls >=50% infill": 0.03222,
+        "PLA, default print settings": 0.0097,
+        "SCM435 screw": 0.03604,
+        "SKS3 pin": 0.00118,
+        "SUS316L pin": 0.00183,
+        "brass insert": 0.00387,
+        "catalog: DYNAMIXEL XM430-W350 82 g": 0.082,
+        "catalog: ELP-USBFHD01M-L180 about 30 g": 0.03,
+        "stainless bearing": 0.01223
+      }
+    },
+    "right_jaw": {
+      "frame": "joint_local_cad_neutral",
+      "mass_kg": 0.119268,
+      "com_m": [
+        0.0170674,
+        -0.0019794,
+        -0.0009283
+      ],
+      "fullinertia_kg_m2": [
+        1.139846e-05,
+        8.998829e-05,
+        9.060453e-05,
+        6.169368e-06,
+        -2.108693e-07,
+        4.98887e-07
+      ],
+      "fullinertia_order": "xx yy zz xy xz yz, about the center of mass",
+      "mass_breakdown_kg": {
+        "A2017 washer": 0.00016,
+        "A2024": 0.00683,
+        "A2024 (machined option)": 0.02334,
+        "HyperV rubber sheet (assumed density)": 0.00367,
+        "PLA, 3 walls >=50% infill": 0.01536,
+        "PLA, default print settings": 0.00285,
+        "S45C key": 0.00054,
+        "S45C spur gear": 0.06265,
+        "SCM435 screw": 0.00387
+      }
+    }
+  }
+}

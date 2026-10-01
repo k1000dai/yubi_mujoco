@@ -1,5 +1,6 @@
 """Wire contract and physical-integrity regressions, without policy privileges."""
 
+import json
 import xml.etree.ElementTree as ET
 import mujoco
 import numpy as np
@@ -9,6 +10,7 @@ from scipy.spatial.transform import Rotation
 
 from yubi_mujoco.env import HANDS, SimConfig, YubiEnv
 from yubi_mujoco.geometry import relative_pose, xyzw_to_wxyz
+from yubi_mujoco.model import ASSETS, JAW_HARD_STOP, JAW_PAD_CONTACT
 
 RELATIVE_KEY = "observation.pose.left_hand_root_to_right_hand_root.absolute"
 
@@ -219,7 +221,7 @@ def test_only_hand_servos_and_jaw_coupling_are_equality_constraints(env):
 
 
 def test_both_jaws_actually_move_with_opposite_equal_angles(env):
-    for target in (0.12, 0.82):
+    for target in (0.12, 0.75):
         for _ in range(30):
             env.step_absolute(env.targets, env.motor_for_jaw([target, target]))
         for hand in HANDS:
@@ -227,6 +229,49 @@ def test_both_jaws_actually_move_with_opposite_equal_angles(env):
             left = env.data.qpos[env.model.joint(f"{hand}_left_joint").qposadr[0]]
             assert right == pytest.approx(target, abs=2e-3)
             assert left == pytest.approx(-right, abs=2e-3)
+
+
+def _jaw(env, hand="left"):
+    return env.data.qpos[env.model.joint(f"{hand}_right_joint").qposadr[0]]
+
+
+def test_jaws_stop_at_pad_contact_and_cad_opening_stop(env):
+    # Glove commands span 0..0.94, but the CAD jaws only travel 0.03..0.80.
+    for command, stop in ((0.0, JAW_PAD_CONTACT), (0.94, JAW_HARD_STOP)):
+        for _ in range(30):
+            env.step_absolute(env.targets, env.motor_for_jaw([command, command]))
+        for hand in HANDS:
+            assert _jaw(env, hand) == pytest.approx(stop, abs=3e-3)
+
+
+def test_jaw_zero_is_closed_pose_of_yubi_sw_urdf(env):
+    # q=0 is the CAD-parallel jaw turned 7.5 deg closed, as in yubi_hand.urdf.xacro.
+    for side, sign in (("right", 1), ("left", -1)):
+        quat = env.model.body(f"left_{side}_finger").quat
+        assert 2 * np.arctan2(quat[3], quat[0]) == pytest.approx(sign * np.radians(7.5))
+
+
+def test_jaw_speed_respects_servo_no_load_speed(env):
+    dof = env.model.joint("left_right_joint").dofadr[0]
+    speeds = []
+    for command in (0.0, 0.94, 0.0):
+        for _ in range(30):
+            env.step_absolute(env.targets, env.motor_for_jaw([command, command]))
+            speeds.append(abs(env.data.qvel[dof]))
+    assert max(speeds) <= env.config.gripper_speed
+    assert max(speeds) > 0.5 * env.config.gripper_speed
+
+
+def test_inertials_come_from_cad_mass_properties(env):
+    bodies = json.loads((ASSETS / "mass_properties.json").read_text())["bodies"]
+    for body, key in (
+        ("left_hand_root", "palm"),
+        ("left_right_finger", "right_jaw"),
+        ("left_left_finger", "left_jaw"),
+    ):
+        assert env.model.body(body).mass[0] == pytest.approx(bodies[key]["mass_kg"])
+    hand = env.model.body("left_hand_root").id
+    assert 0.5 < env.model.body_subtreemass[hand] < 0.56
 
 
 def test_velocity_limiter_is_physical_per_second(env):

@@ -78,6 +78,8 @@ The suite covers the following distinct properties:
 - Seeded resets and exact 10/30/60 Hz control-step timing
 - Finite-stiffness hand tracking and target-rate limits
 - Equal/opposite jaw coupling with one actuator per hand
+- Closed jaw zero, pad-contact and opening stops, servo no-load speed, and
+  CAD-derived body masses
 - No action-time object teleportation or grasp-attachment constraints
 - Wrist-image shapes and the policy-only observation contract
 - Action-chunk validation, unused rows, adopted rows, and report generation
@@ -149,7 +151,7 @@ both native-resolution wrist views. Check MP4 dimensions, frame rate, and actual
 playback separately from still-image rendering. A video looking plausible does
 not verify contact forces or calibrated optics.
 
-GUI teleoperation needs an interactive desktop and a separate manual test.
+The live viewer needs an interactive desktop and a separate manual test.
 Linux headless results alone do not verify the viewer, macOS, Windows, every
 supported Python version, or every rendering backend. CI configuration shows
 intended checks; only completed runs for a specific commit establish results.

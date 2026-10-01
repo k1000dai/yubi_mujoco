@@ -6,7 +6,7 @@ import numpy as np
 import mujoco
 from scipy.spatial.transform import Rotation
 from .geometry import compose_delta, interpolate, pose, relative_pose, xyzw_to_wxyz, wxyz_to_xyzw
-from .model import make_model_xml
+from .model import JAW_HARD_STOP, make_model_xml
 
 HANDS = ("left", "right")
 TASKS = ("pick_place", "push", "lift", "dual_pick_place")
@@ -20,11 +20,12 @@ class SimConfig:
     horizon: int = 900
     object_mass: float = 0.05
     friction: float = 1.2
-    joint_max: float = 0.94
+    joint_max: float = 0.94  # accepted command range; yubi-sw glove URDF, q=0 closed
     motor_scale: float = 1.0  # jaw radians = scale * contract motor radians + offset
     motor_offset: float = 0.0  # nominal, not a calibrated real-robot conversion
-    gripper_kp: float = 4.0
-    gripper_torque: float = 1.0
+    gripper_kp: float = 20.0
+    gripper_torque: float = 4.1  # XM430-W350 stall torque at 12 V, N m
+    gripper_speed: float = 4.8  # XM430-W350 no-load speed at 12 V (46 rpm), rad/s
     max_translation_speed: float = 0.6
     max_rotation_speed: float = 3.0
     camera_fovy: float = 90.0
@@ -51,6 +52,7 @@ class SimConfig:
             "joint_max",
             "gripper_kp",
             "gripper_torque",
+            "gripper_speed",
             "max_translation_speed",
             "max_rotation_speed",
         ):
@@ -106,6 +108,11 @@ class YubiEnv:
             )
         return np.clip(jaw, 0, self.config.joint_max)
 
+    @property
+    def open_jaw(self):
+        """Nominal open jaw angle: about 44 mm between the rubber pads."""
+        return min(0.68, 0.9 * min(self.config.joint_max, JAW_HARD_STOP))
+
     def motor_for_jaw(self, jaw):
         return (np.asarray(jaw) - self.config.motor_offset) / self.config.motor_scale
 
@@ -146,7 +153,7 @@ class YubiEnv:
             self.goals.append(goal)
             self.model.site_pos[self.model.site(f"goal_{i}").id] = [*goal[:2], 0.001]
         self.goals = np.array(self.goals)
-        open_q = min(0.55, 0.9 * self.config.joint_max)
+        open_q = self.open_jaw
         for hand in HANDS:
             for side, sign in (("right", 1), ("left", -1)):
                 self.data.qpos[self.model.joint(f"{hand}_{side}_joint").qposadr[0]] = sign * open_q

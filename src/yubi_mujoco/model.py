@@ -7,6 +7,22 @@ import numpy as np
 from .geometry import xyzw_to_wxyz
 
 ASSETS = Path(__file__).parent / "assets"
+# yubi-sw's yubi_hand.urdf.xacro puts finger q=0 at the glove's calibrated
+# closed pose. Its finger meshes match the CAD jaws rotated 7.5 deg closed
+# from the parallel CAD pose (0.7 mm median residual), so jaw q=0 means closed
+# here too and recorded glove joint_states map 1:1 onto jaw coordinates.
+JAW_ZERO_FROM_CAD_NEUTRAL = np.radians(7.5)
+# Gripper self-collision is not modeled; this lower stop stands in for the
+# opposing rubber pads touching, which the pinned STEP reaches at 0.030 rad.
+JAW_PAD_CONTACT = 0.03
+# Opening interference of FINGER ATTACHMENT with the UPPER PLATE pocket in the
+# pinned STEP begins near 0.806 rad in these coordinates (0.675 rad from CAD
+# neutral). Commands above it are accepted, but the jaw stops there.
+JAW_HARD_STOP = 0.80
+# Wrist camera lens from the pinned STEP: centre (-3.1, 0, 40.1) mm, optical
+# axis pitched 10 deg from root +X toward -Z.
+CAMERA_POS = (-0.0031, 0.0, 0.0401)
+CAMERA_PITCH = np.radians(10.0)
 
 
 def _e(parent, tag, **kwargs):
@@ -15,6 +31,16 @@ def _e(parent, tag, **kwargs):
 
 def _s(x):
     return " ".join(f"{v:.9g}" for v in x)
+
+
+def _inertial(body, props):
+    _e(
+        body,
+        "inertial",
+        pos=_s(props["com_m"]),
+        mass=f"{props['mass_kg']:.9g}",
+        fullinertia=_s(props["fullinertia_kg_m2"]),
+    )
 
 
 def make_model_xml(config, *, mesh_dir=None):
@@ -85,6 +111,7 @@ def make_model_xml(config, *, mesh_dir=None):
             )
         _e(asset, "mesh", name=f"cad_{name}", file=path.name)
     assembly = json.loads((ASSETS / "cad_assembly.json").read_text())
+    inertials = json.loads((ASSETS / "mass_properties.json").read_text())["bodies"]
     world = _e(root, "worldbody")
     _e(
         world,
@@ -130,7 +157,7 @@ def make_model_xml(config, *, mesh_dir=None):
         _e(world, "body", name=f"{hand}_target", mocap="true", pos=_s(pos), quat=_s(quat))
         body = _e(world, "body", name=f"{hand}_hand_root", pos=_s(pos), quat=_s(quat), gravcomp="1")
         _e(body, "freejoint", name=f"{hand}_free")
-        _e(body, "inertial", pos="-0.022 0 -0.02", mass="0.32", diaginertia="0.0004 0.0004 0.0003")
+        _inertial(body, inertials["palm"])
         _e(body, "site", name=f"{hand}_eef", size="0.002", rgba="1 0 0 1")
         _e(
             body,
@@ -157,46 +184,51 @@ def make_model_xml(config, *, mesh_dir=None):
             "geom",
             name=f"{hand}_palm_collision",
             type="box",
-            size="0.022 0.0335 0.025",
-            pos="-0.022 0 -0.018",
+            size="0.022 0.0335 0.0305",
+            pos="-0.022 0 -0.0235",
             contype="2",
             conaffinity="1",
             group="3",
             rgba="0.5 0.5 0.5 0",
         )
-        # Pinhole optical convention: camera looks along +x, up along +z in hand frame.
-        # Extrinsic and FOV are APPROXIMATE, source fisheye not calibrated.
+        # Pinhole optical convention: image right is -y; the view axis is the CAD lens
+        # axis. Extrinsic and FOV are APPROXIMATE, source fisheye not calibrated.
         _e(
             body,
             "camera",
             name=f"wrist_{hand}",
-            pos="0 0 0.0426",
-            xyaxes="0 -1 0 0 0 1",
+            pos=_s(CAMERA_POS),
+            xyaxes=_s([0, -1, 0, np.sin(CAMERA_PITCH), 0, np.cos(CAMERA_PITCH)]),
             fovy=str(config.camera_fovy),
         )
-        for side, sign in (("right", -1), ("left", 1)):
+        stop = min(config.joint_max, JAW_HARD_STOP)
+        for side, sign in (("right", 1), ("left", -1)):
+            # Body frame = CAD-neutral jaw frame turned to the closed q=0 pose.
+            half = sign * JAW_ZERO_FROM_CAD_NEUTRAL / 2
             finger = _e(
                 body,
                 "body",
                 name=f"{hand}_{side}_finger",
                 pos=_s(assembly["bodies"][f"{side}_jaw"]["origin_m"]),
+                quat=_s([np.cos(half), 0, 0, np.sin(half)]),
                 gravcomp="1",
             )
-            _e(
-                finger,
-                "inertial",
-                pos=f"0.055 {sign * 0.004} 0",
-                mass="0.035",
-                diaginertia="0.00001 0.00004 0.00004",
+            _inertial(finger, inertials[f"{side}_jaw"])
+            # The servo drives the right jaw directly; its torque-speed line
+            # (stall torque at zero speed, zero torque at no-load speed) acts as
+            # back-EMF damping on that joint.
+            damping = 0.06 + (
+                config.gripper_torque / config.gripper_speed if side == "right" else 0
             )
-            limits = [0, config.joint_max] if side == "right" else [-config.joint_max, 0]
             _e(
                 finger,
                 "joint",
                 name=f"{hand}_{side}_joint",
                 type="hinge",
                 axis="0 0 -1",
-                range=_s(limits),
+                range=_s([JAW_PAD_CONTACT, stop] if side == "right" else [-stop, -JAW_PAD_CONTACT]),
+                damping=f"{damping:.9g}",
+                solreflimit="0.004 1",
             )
             for part in ("attachment", "pad", "flap", "hardware"):
                 _e(

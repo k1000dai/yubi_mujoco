@@ -14,6 +14,8 @@ root frame and verified hinge-local frames. No intentional solid-geometry
 design changes. Distributed meshes are 13 disjoint material partitions;
 redundant whole-body aggregate meshes are omitted. Approximate black/red
 rendering colors follow the official assembled gripper reference.
+mass_properties.json holds body mass, center-of-mass and inertia estimates
+computed from the same STEP solids with stated material assumptions.
 The CAD-derived meshes and transformation/grouping metadata retain
 CERN-OHL-W-2.0. See SOURCE.md for complete source and regeneration instructions.
 

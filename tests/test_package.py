@@ -108,6 +108,18 @@ def test_module_help_and_version_work_outside_checkout(tmp_path):
         assert "yubi-mujoco" in result.stdout
 
 
+def test_cli_does_not_offer_teleop(capsys):
+    with pytest.raises(SystemExit) as error:
+        main(["--help"])
+    assert error.value.code == 0
+    assert "teleop" not in capsys.readouterr().out
+
+    with pytest.raises(SystemExit) as error:
+        main(["teleop", "--task", "pick_place"])
+    assert error.value.code == 2
+    assert "invalid choice: 'teleop'" in capsys.readouterr().err
+
+
 @pytest.mark.rendering
 def test_render_command_writes_png(tmp_path):
     target = tmp_path / "scene.png"
@@ -172,5 +184,5 @@ def test_macos_viewer_relaunches_under_mjpython(monkeypatch, tmp_path):
     assert env["DYLD_FALLBACK_LIBRARY_PATH"] == "/py/lib:/usr/local/lib:/usr/lib"
 
     monkeypatch.setenv("MJPYTHON_BIN", "already-relaunched")
-    cli._relaunch_under_mjpython(["teleop"])
+    cli._relaunch_under_mjpython(["demo", "--viewer"])
     assert len(calls) == 1

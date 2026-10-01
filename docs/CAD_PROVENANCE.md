@@ -148,14 +148,20 @@ assembly includes the source UR5e mounting flange. A different robot flange
 must be modelled explicitly if required; none is silently substituted.
 
 The separate YUBI software glove URDF uses a nominal opening range of
-`0..0.94 rad`. That does **not** establish the robot gripper's motor zero,
-mechanical stops, safe travel or calibrated aperture. `cad_assembly.json`
-explicitly marks robot zero and joint limits unverified. If a demonstration
-uses the glove range, it is a documented nominal simulation assumption.
+`0..0.94 rad`, with zero at the glove's calibrated closed pose. Its finger
+meshes match these CAD jaws turned 7.5° closed from CAD neutral, so the
+simulator offsets its jaw zero by that angle. Swept CAD solids put pad contact at
+−0.101 rad and the FINGER ATTACHMENT/UPPER PLATE opening interference at
++0.675 rad from CAD neutral. These geometric results do **not** establish the
+robot servo's encoder zero, software position limits or calibrated aperture;
+`cad_assembly.json` still marks robot zero and joint limits unverified.
 
-The meshes preserve visible assembly shape. They do not establish mass density,
-inertia, motor control gains, friction, rubber compliance, gear backlash,
-bearing behavior, self-collision exclusions, contact proxies or actuator
+The meshes preserve visible assembly shape. `cad/mass_properties.py` estimates
+body mass and inertia from the same STEP leaves, using the stated material
+assumptions; run it with OpenCascade's Python bindings, for example
+`uv run --no-project --with cadquery-ocp --with numpy python cad/mass_properties.py`.
+The meshes themselves do not establish motor control gains, friction, rubber
+compliance, gear backlash, bearing behavior, self-collision exclusions, contact proxies or actuator
 calibration. Those require independent modelling and validation. In particular,
 do not use the convex hull of a complete jaw/palm assembly as an accurate
 contact representation of its concave surfaces.

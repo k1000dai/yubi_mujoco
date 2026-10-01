@@ -49,12 +49,6 @@ uv run yubi-mujoco demo --viewer --task dual_pick_place --episodes 3
 time. It works for `demo` and `evaluate`; closing the window stops the run.
 On macOS the CLI relaunches itself under `mjpython` automatically.
 
-To drive the grippers yourself with the keyboard:
-
-```bash
-uv run yubi-mujoco teleop --task pick_place
-```
-
 ### Run headless
 
 ```bash
