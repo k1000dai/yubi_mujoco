@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate release archives and optionally install each in an isolated venv.
 
-Run after ``python -m build``. Smoke tests use temporary working directories
+Run after ``uv build``. Smoke tests use temporary working directories
 outside the checkout and install only core dependencies before testing video.
 No GUI, FreeCAD installation, credentials, or publishing are involved.
 """
@@ -140,6 +140,8 @@ def inspect_sdist(path: Path) -> str:
     validate_assets(files, "src/yubi_mujoco/assets/")
     for name in (
         "pyproject.toml",
+        "uv.lock",
+        ".python-version",
         "README.md",
         "LICENSE",
         "cad/export.py",

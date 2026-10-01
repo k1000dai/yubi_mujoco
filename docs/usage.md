@@ -2,36 +2,51 @@
 
 ## Installation
 
-Use Python 3.10 or newer in a virtual environment. From a source checkout:
+Use the [uv project workflow](https://docs.astral.sh/uv/getting-started/installation/)
+from a source checkout:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install .
+uv sync --locked
+uv run --locked yubi-mujoco --version
 ```
 
-Once the initial release is available on PyPI, `pip install yubi_mujoco` is the
-normal installation command. Before publication, install the source checkout or
-a wheel from a trusted build. A local wheel can be installed outside the source
+uv creates `.venv` automatically and uses the committed `uv.lock` across
+platforms. `.python-version` selects Python 3.12 for the checkout; the package
+supports Python 3.10+. To select a different supported version, add
+`--python VERSION` to both `uv sync` and `uv run`. The `dev` dependency group is
+included by default; add `--no-dev` to both commands for runtime-only use.
+No environment activation is needed.
+
+The package remains pip-compatible. In an existing virtual environment, install
+this checkout with `python -m pip install .`, or a built wheel outside the source
 tree:
 
 ```bash
 python -m pip install /path/to/yubi_mujoco-0.1.0-py3-none-any.whl
 ```
 
+Once the initial release is available on PyPI, use
+`python -m pip install yubi_mujoco`. Before publication, install the source
+checkout or a wheel from a trusted build. pip resolves package metadata ranges;
+it does not consume `uv.lock`.
+
 The base install requires only MuJoCo, NumPy, and SciPy. Video adds imageio and
-imageio-ffmpeg: use `pip install '.[video]'` from a checkout, or
-`pip install 'yubi_mujoco[video]'` after publication. FreeCAD is needed only to
-regenerate the CAD assets.
+imageio-ffmpeg: use `uv sync --locked --extra video` and
+`uv run --locked --extra video yubi-mujoco ...` in the checkout. With pip, use
+`python -m pip install '.[video]'` from a checkout, or
+`python -m pip install 'yubi_mujoco[video]'` after publication. FreeCAD is needed
+only to regenerate the CAD assets.
 
 ## Command line
 
-`yubi-mujoco` and `python -m yubi_mujoco` run the same CLI.
+`uv run --locked yubi-mujoco` and `uv run --locked python -m yubi_mujoco`
+run the same CLI. After a pip install, omit the `uv run --locked` prefix and
+use that environment directly.
 
 ```bash
-yubi-mujoco --version
-yubi-mujoco --help
-yubi-mujoco demo --help
+uv run --locked yubi-mujoco --version
+uv run --locked yubi-mujoco --help
+uv run --locked yubi-mujoco demo --help
 ```
 
 The available tasks are `pick_place` (default), `dual_pick_place`, `lift`, and
@@ -42,9 +57,9 @@ runs. A `--horizon` is a count of control steps, not seconds. Seed batches use
 ### Scripted demos
 
 ```bash
-yubi-mujoco demo
-yubi-mujoco demo --task pick_place --seed 0 --episodes 10 --output yubi-output/batch
-yubi-mujoco demo --task dual_pick_place --video --output yubi-output/dual
+uv run --locked yubi-mujoco demo
+uv run --locked yubi-mujoco demo --task pick_place --seed 0 --episodes 10 --output yubi-output/batch
+uv run --locked --extra video yubi-mujoco demo --task dual_pick_place --video --output yubi-output/dual
 ```
 
 The demo is an **object-state-aware scripted baseline**. It reads simulator
@@ -61,8 +76,8 @@ replaced. A JSON report's status and errors matter even when a CLI run finishes.
 ### Render an image
 
 ```bash
-yubi-mujoco render --output scene.png --camera overview --width 960 --height 720
-yubi-mujoco render --camera wrist_left --width 640 --height 480 --output wrist.png
+uv run --locked yubi-mujoco render --output scene.png --camera overview --width 960 --height 720
+uv run --locked yubi-mujoco render --camera wrist_left --width 640 --height 480 --output wrist.png
 ```
 
 Named cameras are `overview`, `top`, `wrist_left`, and `wrist_right`. Rendering
@@ -74,7 +89,7 @@ write PNG images without the video extra.
 ### Portable MJCF
 
 ```bash
-yubi-mujoco export-mjcf --task dual_pick_place --output yubi-output/mjcf
+uv run --locked yubi-mujoco export-mjcf --task dual_pick_place --output yubi-output/mjcf
 ```
 
 This produces `scene.xml`, relative-path mesh assets, the model's JSON
@@ -93,9 +108,9 @@ a self-contained scene.
 ### Keyboard teleoperation
 
 ```bash
-yubi-mujoco teleop --task pick_place
+uv run --locked yubi-mujoco teleop --task pick_place
 # On macOS, the passive viewer requires the MuJoCo Python launcher:
-mjpython -m yubi_mujoco teleop --task pick_place
+uv run --locked mjpython -m yubi_mujoco teleop --task pick_place
 ```
 
 Teleoperation needs a desktop OpenGL window. Select a hand with `1`/`2`.
@@ -168,8 +183,8 @@ an image-only evaluation.
 ## Local policy evaluation
 
 ```bash
-yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
-yubi-mujoco evaluate --policy /path/to/policy.py --checkpoint /path/to/checkpoint \
+uv run --locked yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
+uv run --locked yubi-mujoco evaluate --policy /path/to/policy.py --checkpoint /path/to/checkpoint \
   --task pick_place --episodes 5 --hz 30 --adopt-rows 16 \
   --translation-frame body --output yubi-output/model
 ```
@@ -246,7 +261,7 @@ need the official interface checker and evaluation process.
 ## Rendering and platform notes
 
 Physics stepping requires no GPU. Rendering requires a working OpenGL context
-and system graphics libraries; pip dependencies alone do not provide all of
+and system graphics libraries; Python dependencies alone do not provide all of
 those libraries. A software rendering backend may be used where supported.
 A learned policy may have its own GPU requirements, independent of this package.
 
@@ -255,7 +270,7 @@ On Linux without `DISPLAY`, rendering CLI commands select EGL unless
 MuJoCo or the environment**, for example:
 
 ```bash
-MUJOCO_GL=egl python your_program.py
+MUJOCO_GL=egl uv run --locked python your_program.py
 ```
 
 If EGL is unavailable, configure a supported backend on your system. OSMesa

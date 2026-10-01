@@ -19,20 +19,21 @@ These local results do not establish macOS/Windows or remote CI results.
 
 ## Run the checks
 
-From a clean source checkout, install the development and video extras:
+From a clean source checkout, sync the locked development group and video extra:
 
 ```bash
-python -m pip install -e '.[dev,video]'
-python -m ruff check .
-python -m ruff format --check .
-python -m pytest -q
-python -m build
-python -m twine check --strict dist/*
-python scripts/check_dist.py dist
+uv lock --check
+uv sync --locked --extra video
+uv run --locked --extra video ruff check .
+uv run --locked --extra video ruff format --check .
+uv run --locked --extra video pytest -q
+uv build
+uv run --locked --no-sync twine check --strict dist/*
+uv run --locked --no-sync python scripts/check_dist.py dist
 ```
 
 Image tests require a working OpenGL backend. On a suitable headless Linux
-system, run `MUJOCO_GL=egl python -m pytest -q`. A system configured for software
+system, run `MUJOCO_GL=egl uv run --locked --extra video pytest -q`. A system configured for software
 rendering may instead use OSMesa. See [rendering setup](usage.md#rendering-and-platform-notes).
 Do not treat a rendering test that was skipped or could not initialize as a
 passed graphics test.
@@ -55,13 +56,16 @@ the entire export directory, and check that it still resolves its mesh files.
 For a combined distribution smoke check, after the build:
 
 ```bash
-python scripts/check_dist.py dist --smoke --render --video
+uv run --locked --no-sync python scripts/check_dist.py dist --smoke --render --video
 ```
 
 The repository CI configuration includes Linux Python 3.10, 3.12, and 3.13, plus
 macOS and Windows Python 3.12. Rendering tests run on Linux; other platforms run
-the non-rendering subset. Distribution checks build an sdist and a wheel from
-that sdist, then install them in separate environments. These are configured
+the non-rendering subset. Each test job uses `uv sync --locked --extra video
+--no-editable` and tests the installed package outside the checkout. Distribution
+checks build an sdist and a wheel from
+that sdist, then install them with pip in separate clean environments, preserving
+coverage for users who do not use uv. These are configured
 checks, not a claim that remote CI has already passed.
 
 ## Regression coverage
@@ -92,11 +96,11 @@ Read [CAD provenance](CAD_PROVENANCE.md) before changing the mesh pipeline.
 ## Reproduce task evaluations
 
 ```bash
-yubi-mujoco demo --task pick_place --seed 0 --episodes 10 --output yubi-output/pick-10
-yubi-mujoco demo --task dual_pick_place --seed 0 --episodes 5 --output yubi-output/dual-5
-yubi-mujoco demo --task push --seed 0 --episodes 5 --output yubi-output/push-5
-yubi-mujoco demo --task lift --hz 10 --seed 0 --output yubi-output/lift-10hz
-yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
+uv run --locked yubi-mujoco demo --task pick_place --seed 0 --episodes 10 --output yubi-output/pick-10
+uv run --locked yubi-mujoco demo --task dual_pick_place --seed 0 --episodes 5 --output yubi-output/dual-5
+uv run --locked yubi-mujoco demo --task push --seed 0 --episodes 5 --output yubi-output/push-5
+uv run --locked yubi-mujoco demo --task lift --hz 10 --seed 0 --output yubi-output/lift-10hz
+uv run --locked yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
 ```
 
 These commands produce fresh evidence rather than a fixed advertised success

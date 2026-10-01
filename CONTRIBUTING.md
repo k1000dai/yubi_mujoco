@@ -6,19 +6,27 @@ measured calibration data with provenance, and improved collision models.
 
 ## Development setup
 
-Use Python 3.10 or newer in a virtual environment:
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and use the
+committed lockfile. The checkout defaults to Python 3.12; Python 3.10+ remains
+supported. uv creates `.venv` automatically, without shell activation:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -e '.[dev,video]'
-python -m ruff check .
-python -m ruff format --check .
-python -m pytest -q
+uv sync --locked --extra video
+uv lock --check
+uv run --locked --extra video ruff check .
+uv run --locked --extra video ruff format --check .
+uv run --locked --extra video pytest -q
 ```
 
+Development tools live in `[dependency-groups].dev` and are included by default;
+`video` remains a published optional extra. Use `uv add` for runtime dependencies,
+`uv add --dev` for development tools, and `uv add --optional video` for video
+requirements. Commit `pyproject.toml` and the generated `uv.lock` together. To
+refresh a specific dependency intentionally, use `uv lock --upgrade-package NAME`,
+then run the checks. Do not hand-edit the lockfile. CI rejects a stale lockfile.
+
 Rendering tests need system OpenGL support. On headless Linux with EGL configured,
-use `MUJOCO_GL=egl python -m pytest -q`. See [usage](docs/usage.md) for backend and
+use `MUJOCO_GL=egl uv run --locked --extra video pytest -q`. See [usage](docs/usage.md) for backend and
 viewer notes. Keep generated rollouts, build products, virtual environments,
 checkpoints, credentials, and local caches out of commits.
 
@@ -63,14 +71,20 @@ Do not label the complete distribution “MIT-only” or imply Toyota/AIRoA endo
 ## Build and inspect distributions
 
 ```bash
-python -m build
-python -m twine check --strict dist/*
-python scripts/check_dist.py dist
+uv build
+uv run --locked --no-sync twine check --strict dist/*
+uv run --locked --no-sync python scripts/check_dist.py dist
 ```
+
+`uv build` builds the source archive first, then builds the wheel from that
+archive. Isolated build dependencies are pinned separately in
+`[tool.uv].build-constraint-dependencies`; `uv.lock` locks runtime and development
+dependencies. Review and test updates to both when updating the build tools.
 
 Check both wheel and source archive contents. The wheel must contain the active
 meshes, JSON manifests, source/attribution notices, and relevant licenses. The
-source archive must retain the CAD regeneration inputs and tools. Neither should
+source archive must retain `uv.lock`, `.python-version`, and the CAD regeneration
+inputs and tools. Neither should
 contain local environments, credentials, experiment outputs, or caches.
 
 Install the wheel into a clean environment outside the checkout. Test
@@ -91,7 +105,8 @@ Maintainer steps:
 1. Choose the version and update `pyproject.toml`, the package version, and
    `CHANGELOG.md` together. Update the same-version sdist filename and PyPI URL
    in `src/yubi_mujoco/assets/SOURCE.md`; archive checks reject stale source links.
-   Run the complete release checks on that exact commit.
+   Run `uv lock` to refresh the locked project version, then run the complete
+   release checks on that exact commit.
 2. In PyPI, create an upload token yourself. Store it in the GitHub repository's
    Actions secret named `PYPI_API_TOKEN`; never commit it or paste it into an
    issue, log, or chat. This workflow uses a token, not OIDC trusted publishing.

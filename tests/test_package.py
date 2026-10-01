@@ -20,6 +20,13 @@ def test_package_version_matches_distribution():
     assert metadata.version("yubi_mujoco") == __version__
 
 
+def test_development_tools_are_not_published_as_runtime_requirements():
+    package = metadata.metadata("yubi_mujoco")
+    assert package.get_all("Provides-Extra") == ["video"]
+    requirements = package.get_all("Requires-Dist") or []
+    assert not any(req.startswith(("pytest", "ruff", "twine", "build")) for req in requirements)
+
+
 def test_runtime_assets_are_complete_and_hashed():
     import hashlib
 

@@ -23,6 +23,8 @@ on a successful publication; this entry alone does not indicate it is published.
   the optional `video` extra
 - English usage, model-limit, validation, contributor, and release documentation
 - Source-only CAD regeneration inputs/tools, separate from the runtime wheel
+- uv project workflow with a cross-platform lockfile, a local development
+  dependency group, pinned build tools, and locked CI installs
 
 ### Scope
 

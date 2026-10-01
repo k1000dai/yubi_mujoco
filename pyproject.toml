@@ -27,7 +27,6 @@ dependencies = ["mujoco>=3.2,<4", "numpy>=1.26", "scipy>=1.12"]
 
 [project.optional-dependencies]
 video = ["imageio>=2.34", "imageio-ffmpeg>=0.5"]
-dev = ["pytest>=8", "ruff>=0.12", "build>=1.2", "twine>=6"]
 
 [project.urls]
 Repository = "https://github.com/k1000dai/yubi_mujoco"
@@ -36,6 +35,13 @@ Changelog = "https://github.com/k1000dai/yubi_mujoco/blob/main/CHANGELOG.md"
 
 [project.scripts]
 yubi-mujoco = "yubi_mujoco.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.12", "twine>=6"]
+
+[tool.uv]
+# Isolated builds are separate from uv.lock; pin their backend dependencies too.
+build-constraint-dependencies = ["setuptools==84.0.0", "wheel==0.48.0", "packaging==26.3"]
 
 [tool.setuptools]
 include-package-data = false

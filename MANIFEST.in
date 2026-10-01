@@ -1,4 +1,4 @@
-include LICENSE README.md CHANGELOG.md CONTRIBUTING.md pyproject.toml
+include LICENSE README.md CHANGELOG.md CONTRIBUTING.md pyproject.toml uv.lock .python-version
 recursive-include src/yubi_mujoco *.py *.json *.md *.stl *.txt py.typed
 recursive-include tests *.py
 recursive-include examples *.py *.json
