@@ -1,11 +1,13 @@
 """Runnable demos, batch evaluation, portable MJCF and interactive pose teleop."""
 
 import argparse
+from contextlib import contextmanager
 from dataclasses import asdict
 import json
 import os
 from pathlib import Path
 import shutil
+import sysconfig
 import time
 import sys
 import numpy as np
@@ -44,8 +46,41 @@ def _headless_backend():
         os.environ.setdefault("MUJOCO_GL", "egl")
 
 
+class _ViewerClosed(Exception):
+    """Raised from a step callback when the user closes the live viewer."""
+
+
+@contextmanager
+def _live_viewer(env, enabled):
+    if not enabled:
+        yield None
+        return
+    import mujoco.viewer
+
+    with mujoco.viewer.launch_passive(env.model, env.data) as viewer:
+        yield viewer
+
+
+def _relaunch_under_mjpython(argv):
+    """On macOS, passive viewers need mjpython; re-execute this CLI under it."""
+    if sys.platform != "darwin" or os.environ.get("MJPYTHON_BIN"):
+        return
+    mjpython = Path(sysconfig.get_path("scripts")) / "mjpython"
+    if not mjpython.exists():
+        return  # launch_passive then reports the mjpython requirement
+    env = os.environ.copy()
+    libdir = sysconfig.get_config_var("LIBDIR")
+    if libdir:
+        # uv and other standalone Pythons load libpython via @rpath, which does
+        # not resolve once mjpython re-executes from inside its app bundle.
+        fallback = env.get("DYLD_FALLBACK_LIBRARY_PATH") or "/usr/local/lib:/usr/lib"
+        env["DYLD_FALLBACK_LIBRARY_PATH"] = f"{libdir}:{fallback}"
+    os.execve(mjpython, [str(mjpython), "-m", "yubi_mujoco", *argv], env)
+
+
 def _run(args):
-    _headless_backend()
+    if not args.viewer:
+        _headless_backend()
     from .env import YubiEnv
     from .scripted import oracle_rollout
     from .adapter import HoldPolicy, load_policy, run_policy
@@ -63,14 +98,27 @@ def _run(args):
     writer = _writer(out, args.video, config.control_hz)
     try:
         for index in range(args.episodes):
-            with YubiEnv(config) as env:
+            with YubiEnv(config) as env, _live_viewer(env, args.viewer) as viewer:
                 env.reset(seed=args.seed + index)
                 records = []
+                last_frame = time.perf_counter()
 
                 def callback(e, info):
+                    nonlocal last_frame
                     records.append(info)
                     if writer and index == 0:
                         writer.append_data(e.render(width=960, height=720))
+                    if viewer:
+                        if not viewer.is_running():
+                            raise _ViewerClosed
+                        viewer.sync()
+                        # Pace the rollout at the control rate so it plays in real time.
+                        delay = 1 / e.config.control_hz - (time.perf_counter() - last_frame)
+                        time.sleep(max(0, delay))
+                        last_frame = time.perf_counter()
+
+                if viewer:
+                    viewer.sync()
 
                 if index == 0 and args.video:
                     write_png(out / "scene.png", env.render(width=960, height=720))
@@ -106,11 +154,16 @@ def _run(args):
                     flush=True,
                 )
                 (out / "report.json").write_text(json.dumps(report, indent=2))
+    except _ViewerClosed:
+        report["stopped_early"] = "viewer closed"
+        print("Viewer closed; stopping.", flush=True)
     finally:
         if writer:
             writer.close()
     report["successes"] = sum(r["success"] for r in report["episodes"])
-    report["success_rate"] = report["successes"] / len(report["episodes"])
+    report["success_rate"] = (
+        report["successes"] / len(report["episodes"]) if report["episodes"] else None
+    )
     (out / "report.json").write_text(json.dumps(report, indent=2))
     print(f"Results: {out.resolve() / 'report.json'}")
     return 0
@@ -240,6 +293,11 @@ def main(argv=None):
         if cmd in ("demo", "evaluate"):
             p.add_argument("--episodes", type=int, default=1)
             p.add_argument("--video", action="store_true")
+            p.add_argument(
+                "--viewer",
+                action="store_true",
+                help="watch the rollout live in the MuJoCo viewer (needs a desktop display)",
+            )
         if cmd == "evaluate":
             p.add_argument(
                 "--policy", default="hold", help="hold or path to a trusted local policy.py"
@@ -247,11 +305,14 @@ def main(argv=None):
             p.add_argument("--checkpoint", default=".")
             p.add_argument("--adopt-rows", type=int, default=16)
             p.add_argument("--translation-frame", choices=("body", "world"), default="body")
+    argv = sys.argv[1:] if argv is None else list(argv)
     args = parser.parse_args(argv)
     if getattr(args, "episodes", 1) < 1:
         parser.error("episodes must be positive")
     if args.command == "render" and not (0 < args.width <= 1280 and 0 < args.height <= 960):
         parser.error("render width must be 1..1280 and height 1..960")
+    if args.command == "teleop" or getattr(args, "viewer", False):
+        _relaunch_under_mjpython(argv)
     handlers = {
         "export-mjcf": _export,
         "render": _render,

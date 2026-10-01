@@ -19,6 +19,8 @@ on a successful publication; this entry alone does not indicate it is published.
   configurable chunk adoption, explicit timing, and JSON diagnostics
 - PNG scene rendering, optional MP4 recording, portable MJCF export, and
   keyboard teleoperation
+- Real-time MuJoCo viewer for `demo` and `evaluate` (`--viewer`), with automatic
+  `mjpython` relaunch on macOS for the viewer and teleoperation
 - Minimal base dependencies: MuJoCo, NumPy, and SciPy; video dependencies in
   the optional `video` extra
 - English usage, model-limit, validation, contributor, and release documentation

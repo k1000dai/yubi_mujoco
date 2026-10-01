@@ -4,6 +4,11 @@ Arm-free YUBI gripper simulation in MuJoCo. Command two end-effector poses and
 absolute gripper angles, test contact-based manipulation, and connect a local
 `Policy.infer(obs)` implementation.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/k1000dai/yubi_mujoco/main/docs/images/scene.png" alt="Two YUBI grippers above a table with a red cube and a goal marker" width="49%">
+  <img src="https://raw.githubusercontent.com/k1000dai/yubi_mujoco/main/docs/images/dual_pick_place.png" alt="Both YUBI grippers carrying cubes toward their goals in the dual pick-and-place task" width="49%">
+</p>
+
 The black/red grippers use Toyota's actual robot-gripper CAD: 97 source solids,
 partitioned into 13 material meshes. Dynamic hands follow finite-stiffness mocap
 targets; objects are moved by contact, without grasp attachments or teleporting.
@@ -15,72 +20,66 @@ their success is not a learned-policy result.
 
 ## Install
 
-The repository is a [uv project](https://docs.astral.sh/uv/getting-started/installation/).
-Install uv, then run:
+With [uv](https://docs.astral.sh/uv/getting-started/installation/):
 
 ```bash
 git clone https://github.com/k1000dai/yubi_mujoco.git
 cd yubi_mujoco
-uv sync --locked
-uv run --locked yubi-mujoco --version
+uv sync
+uv run yubi-mujoco --version
 ```
 
-uv creates `.venv` and installs the versions recorded in `uv.lock`, including the
-local `dev` dependency group. No manual virtual-environment activation is needed.
-The checkout defaults to Python 3.12 via `.python-version`; the package supports
-Python 3.10 or newer. Use `--python 3.10` (or another supported version) on both
-`uv sync` and `uv run` to override the checkout default. For runtime-only use,
-add `--no-dev` to both commands.
+Or with pip, from the checkout: `python -m pip install .`
 
-The base dependencies are MuJoCo, NumPy, and SciPy. No GPU, ROS, FreeCAD, or robot
-is needed for physics. Images need a working OpenGL backend; see
+Python 3.10+ is supported. The only runtime dependencies are MuJoCo, NumPy, and
+SciPy; no GPU, ROS, FreeCAD, or robot is needed for physics. Images and the
+viewer need a working OpenGL backend; see
 [rendering setup](docs/usage.md#rendering-and-platform-notes).
-
-### Install with pip
-
-A built wheel or source checkout is also a standard Python package; consumers
-do not need uv:
-
-```bash
-python -m pip install ./dist/yubi_mujoco-0.1.0-py3-none-any.whl
-# Or, from the repository root:
-python -m pip install .
-```
-
-After the first release has been published to PyPI, use
-`python -m pip install yubi_mujoco`. PyPI availability is not implied by this
-checkout. A pip installation uses the dependency ranges in package metadata,
-not the repository's uv lockfile.
 
 ## Quick start
 
+### Watch it in the MuJoCo viewer
+
+```bash
+uv run yubi-mujoco demo --viewer
+uv run yubi-mujoco demo --viewer --task dual_pick_place --episodes 3
+```
+
+`--viewer` opens the interactive MuJoCo window and plays the rollout in real
+time. It works for `demo` and `evaluate`; closing the window stops the run.
+On macOS the CLI relaunches itself under `mjpython` automatically.
+
+To drive the grippers yourself with the keyboard:
+
+```bash
+uv run yubi-mujoco teleop --task pick_place
+```
+
+### Run headless
+
 ```bash
 # A contact-based pick-and-place demo; writes JSON results to yubi-output/demo
-uv run --locked yubi-mujoco demo
+uv run yubi-mujoco demo
 
 # Other tasks and repeatable seed batches
-uv run --locked yubi-mujoco demo --task dual_pick_place --episodes 5 --seed 0
-uv run --locked yubi-mujoco demo --task lift --hz 10 --output yubi-output/lift
-uv run --locked yubi-mujoco demo --task push --output yubi-output/push
+uv run yubi-mujoco demo --task dual_pick_place --episodes 5 --seed 0
+uv run yubi-mujoco demo --task lift --hz 10 --output yubi-output/lift
+uv run yubi-mujoco demo --task push --output yubi-output/push
 
 # A scene image, and a portable MJCF bundle
-uv run --locked yubi-mujoco render --output scene.png --camera overview --width 960 --height 720
-uv run --locked yubi-mujoco export-mjcf --output yubi-output/mjcf
+uv run yubi-mujoco render --output scene.png --camera overview
+uv run yubi-mujoco export-mjcf --output yubi-output/mjcf
 ```
 
-`uv run --locked python -m yubi_mujoco` runs the same CLI. Try
-`uv run --locked yubi-mujoco --help`. Choose a new output directory to preserve
-earlier runs. After a pip install, use `yubi-mujoco` directly in that environment.
+Tasks are `pick_place` (default), `dual_pick_place`, `lift`, and `push`. See
+`uv run yubi-mujoco <command> --help` for all options. After a pip install, call
+`yubi-mujoco` directly.
 
-For video, enable the optional imageio/FFmpeg dependencies:
+For MP4 video, add the optional `video` extra:
 
 ```bash
-uv sync --locked --extra video
-uv run --locked --extra video yubi-mujoco demo --task dual_pick_place --video --output yubi-output/video
+uv run --extra video yubi-mujoco demo --task dual_pick_place --video --output yubi-output/video
 ```
-
-For pip consumers, use `python -m pip install '.[video]'` from a checkout or
-`python -m pip install 'yubi_mujoco[video]'` after publication.
 
 ## Python API
 
@@ -105,16 +104,17 @@ See the complete [API and policy contract](docs/usage.md).
 
 ```bash
 # Interface smoke test; an idle hold policy is not expected to solve the task
-uv run --locked yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
+uv run yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
 
-uv run --locked yubi-mujoco evaluate --policy /path/to/policy.py \
+uv run yubi-mujoco evaluate --policy /path/to/policy.py \
   --checkpoint /path/to/checkpoint --hz 30 --adopt-rows 16 \
   --output yubi-output/policy
 ```
 
-Evaluation renders two wrist images, even without `--video`, and needs OpenGL.
-Only load trusted Python policy files. See [examples/policy.py](examples/policy.py)
-and the [UMI Arena submission contract](https://umi-arena.airoa.io/submission-format).
+Add `--viewer` to watch the policy act. Evaluation renders two wrist images,
+even without `--video`, and needs OpenGL. Only load trusted Python policy files.
+See [examples/policy.py](examples/policy.py) and the
+[UMI Arena submission contract](https://umi-arena.airoa.io/submission-format).
 Dataset/replay timing is 30 Hz; the published robot execution description uses
 10 Hz. Select the intended rate explicitly. This package does not download
 checkpoints or gated datasets, and does not replace the official checker.

@@ -123,3 +123,54 @@ def test_cli_invalid_limits_exits_cleanly(args):
     with pytest.raises(SystemExit) as error:
         main(args)
     assert error.value.code == 2
+
+
+def test_viewer_paces_rollout_and_stops_when_closed(monkeypatch, tmp_path):
+    from contextlib import contextmanager
+    from yubi_mujoco import cli
+
+    class FakeViewer:
+        syncs = 0
+
+        def is_running(self):
+            return self.syncs < 5
+
+        def sync(self):
+            self.syncs += 1
+
+    viewer = FakeViewer()
+
+    @contextmanager
+    def fake_viewer(env, enabled):
+        assert enabled
+        yield viewer
+
+    monkeypatch.setattr(cli, "_live_viewer", fake_viewer)
+    monkeypatch.setattr(cli, "_relaunch_under_mjpython", lambda argv: None)
+    out = tmp_path / "viewer"
+    assert main(["demo", "--viewer", "--hz", "60", "--episodes", "2", "--output", str(out)]) == 0
+    report = json.loads((out / "report.json").read_text())
+    assert viewer.syncs == 5
+    assert report["stopped_early"] == "viewer closed"
+    assert report["episodes"] == [] and report["success_rate"] is None
+
+
+def test_macos_viewer_relaunches_under_mjpython(monkeypatch, tmp_path):
+    from yubi_mujoco import cli
+
+    (tmp_path / "mjpython").touch()
+    calls = []
+    monkeypatch.setattr(cli.sys, "platform", "darwin")
+    monkeypatch.delenv("MJPYTHON_BIN", raising=False)
+    monkeypatch.delenv("DYLD_FALLBACK_LIBRARY_PATH", raising=False)
+    monkeypatch.setattr(cli.sysconfig, "get_path", lambda name: str(tmp_path))
+    monkeypatch.setattr(cli.sysconfig, "get_config_var", lambda name: "/py/lib")
+    monkeypatch.setattr(cli.os, "execve", lambda *call: calls.append(call))
+    cli._relaunch_under_mjpython(["demo", "--viewer"])
+    ((path, argv, env),) = calls
+    assert argv == [str(tmp_path / "mjpython"), "-m", "yubi_mujoco", "demo", "--viewer"]
+    assert env["DYLD_FALLBACK_LIBRARY_PATH"] == "/py/lib:/usr/local/lib:/usr/lib"
+
+    monkeypatch.setenv("MJPYTHON_BIN", "already-relaunched")
+    cli._relaunch_under_mjpython(["teleop"])
+    assert len(calls) == 1

@@ -6,12 +6,12 @@ Use the [uv project workflow](https://docs.astral.sh/uv/getting-started/installa
 from a source checkout:
 
 ```bash
-uv sync --locked
-uv run --locked yubi-mujoco --version
+uv sync
+uv run yubi-mujoco --version
 ```
 
-uv creates `.venv` automatically and uses the committed `uv.lock` across
-platforms. `.python-version` selects Python 3.12 for the checkout; the package
+uv creates `.venv` automatically and installs the versions in the committed
+`uv.lock`; add `--locked` to fail instead of updating a stale lockfile. `.python-version` selects Python 3.12 for the checkout; the package
 supports Python 3.10+. To select a different supported version, add
 `--python VERSION` to both `uv sync` and `uv run`. The `dev` dependency group is
 included by default; add `--no-dev` to both commands for runtime-only use.
@@ -31,22 +31,21 @@ checkout or a wheel from a trusted build. pip resolves package metadata ranges;
 it does not consume `uv.lock`.
 
 The base install requires only MuJoCo, NumPy, and SciPy. Video adds imageio and
-imageio-ffmpeg: use `uv sync --locked --extra video` and
-`uv run --locked --extra video yubi-mujoco ...` in the checkout. With pip, use
+imageio-ffmpeg: use `uv sync --extra video` and
+`uv run --extra video yubi-mujoco ...` in the checkout. With pip, use
 `python -m pip install '.[video]'` from a checkout, or
 `python -m pip install 'yubi_mujoco[video]'` after publication. FreeCAD is needed
 only to regenerate the CAD assets.
 
 ## Command line
 
-`uv run --locked yubi-mujoco` and `uv run --locked python -m yubi_mujoco`
-run the same CLI. After a pip install, omit the `uv run --locked` prefix and
-use that environment directly.
+`uv run yubi-mujoco` and `uv run python -m yubi_mujoco` run the same CLI. After
+a pip install, omit the `uv run` prefix and use that environment directly.
 
 ```bash
-uv run --locked yubi-mujoco --version
-uv run --locked yubi-mujoco --help
-uv run --locked yubi-mujoco demo --help
+uv run yubi-mujoco --version
+uv run yubi-mujoco --help
+uv run yubi-mujoco demo --help
 ```
 
 The available tasks are `pick_place` (default), `dual_pick_place`, `lift`, and
@@ -57,9 +56,9 @@ runs. A `--horizon` is a count of control steps, not seconds. Seed batches use
 ### Scripted demos
 
 ```bash
-uv run --locked yubi-mujoco demo
-uv run --locked yubi-mujoco demo --task pick_place --seed 0 --episodes 10 --output yubi-output/batch
-uv run --locked --extra video yubi-mujoco demo --task dual_pick_place --video --output yubi-output/dual
+uv run yubi-mujoco demo
+uv run yubi-mujoco demo --task pick_place --seed 0 --episodes 10 --output yubi-output/batch
+uv run --extra video yubi-mujoco demo --task dual_pick_place --video --output yubi-output/dual
 ```
 
 The demo is an **object-state-aware scripted baseline**. It reads simulator
@@ -73,11 +72,32 @@ policy generalization.
 output directory for each experiment; existing files with the same names may be
 replaced. A JSON report's status and errors matter even when a CLI run finishes.
 
+### Live viewer
+
+```bash
+uv run yubi-mujoco demo --viewer
+uv run yubi-mujoco demo --viewer --task push --episodes 3
+uv run yubi-mujoco evaluate --viewer --policy /path/to/policy.py --checkpoint /path/to/checkpoint
+```
+
+`--viewer` opens MuJoCo's interactive viewer for each episode and paces the
+rollout at the control rate, so it plays in real time. The usual mouse controls
+(rotate, pan, zoom, perturb) and the viewer's panels are available. Closing the
+window stops the run; completed episodes stay in `report.json`, which records
+`"stopped_early": "viewer closed"`. Reports, traces, and `--video` output are
+written as in a headless run, but `wall_seconds` includes the real-time pacing.
+
+The viewer needs a desktop OpenGL window, not a headless backend. On macOS,
+MuJoCo's passive viewer must run under `mjpython`; `--viewer` and `teleop`
+relaunch the CLI under the environment's `mjpython` automatically. This also
+works for uv-managed Pythons, whose shared library plain `uv run mjpython`
+cannot locate.
+
 ### Render an image
 
 ```bash
-uv run --locked yubi-mujoco render --output scene.png --camera overview --width 960 --height 720
-uv run --locked yubi-mujoco render --camera wrist_left --width 640 --height 480 --output wrist.png
+uv run yubi-mujoco render --output scene.png --camera overview --width 960 --height 720
+uv run yubi-mujoco render --camera wrist_left --width 640 --height 480 --output wrist.png
 ```
 
 Named cameras are `overview`, `top`, `wrist_left`, and `wrist_right`. Rendering
@@ -89,7 +109,7 @@ write PNG images without the video extra.
 ### Portable MJCF
 
 ```bash
-uv run --locked yubi-mujoco export-mjcf --task dual_pick_place --output yubi-output/mjcf
+uv run yubi-mujoco export-mjcf --task dual_pick_place --output yubi-output/mjcf
 ```
 
 This produces `scene.xml`, relative-path mesh assets, the model's JSON
@@ -108,12 +128,10 @@ a self-contained scene.
 ### Keyboard teleoperation
 
 ```bash
-uv run --locked yubi-mujoco teleop --task pick_place
-# On macOS, the passive viewer requires the MuJoCo Python launcher:
-uv run --locked mjpython -m yubi_mujoco teleop --task pick_place
+uv run yubi-mujoco teleop --task pick_place
 ```
 
-Teleoperation needs a desktop OpenGL window. Select a hand with `1`/`2`.
+Teleoperation uses the same viewer as `--viewer` (see above). Select a hand with `1`/`2`.
 `W`/`S`, `A`/`D`, and `R`/`F` move it along world ±X, ±Y, and ±Z. `I`/`K`
 change pitch, `J`/`L` yaw, and `U`/`M` roll. `O`/`C` open/close the gripper.
 Press Space to reset, including after an episode finishes, and Escape to exit.
@@ -183,8 +201,8 @@ an image-only evaluation.
 ## Local policy evaluation
 
 ```bash
-uv run --locked yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
-uv run --locked yubi-mujoco evaluate --policy /path/to/policy.py --checkpoint /path/to/checkpoint \
+uv run yubi-mujoco evaluate --policy hold --horizon 64 --output yubi-output/hold
+uv run yubi-mujoco evaluate --policy /path/to/policy.py --checkpoint /path/to/checkpoint \
   --task pick_place --episodes 5 --hz 30 --adopt-rows 16 \
   --translation-frame body --output yubi-output/model
 ```
@@ -270,7 +288,7 @@ On Linux without `DISPLAY`, rendering CLI commands select EGL unless
 MuJoCo or the environment**, for example:
 
 ```bash
-MUJOCO_GL=egl uv run --locked python your_program.py
+MUJOCO_GL=egl uv run python your_program.py
 ```
 
 If EGL is unavailable, configure a supported backend on your system. OSMesa
